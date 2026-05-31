@@ -17,6 +17,9 @@ import com.example.order_microservice.exceptions.OrderNotFoundException;
 import com.example.order_microservice.repository.OrderItemRepository;
 import com.example.order_microservice.repository.OrderRepository;
 
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+
+
 @Service
 public class OrderItemServiceImp implements IOrderItemService {
 
@@ -29,6 +32,7 @@ public class OrderItemServiceImp implements IOrderItemService {
 	OrderRepository repo1;
 
 	@Override
+	@CircuitBreaker(name="productService", fallbackMethod="fallbackProduct")
 	public OrderItemResponseDTO addOrderItem(OrderItemDTO dtitem) {
 
 		OrderItem item = new OrderItem();
@@ -191,5 +195,17 @@ public class OrderItemServiceImp implements IOrderItemService {
 
 		return response;
 	}
+
+	public OrderItemResponseDTO fallbackProduct(OrderItemDTO dtitem, Exception ex) {
+		
+		System.out.println("Call back Triggered");
+	    OrderItemResponseDTO res = new OrderItemResponseDTO();
+	    res.setProductId(1111);
+	    res.setQuantity(2222);
+	    res.setTotalPrice(0); // fallback value
+	    res.setOrderId(8888);
+	    return res;
+	}
+
 
 }
